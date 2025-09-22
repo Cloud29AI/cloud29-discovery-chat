@@ -48,7 +48,7 @@
     </div>
 
     <!-- Your booking button (uses your real link) -->
-    <a class="cta" id="bookBtn" href="https://bookme.name/morgandeancloud29/discovery-call" target="_blank" rel="noopener">Book a demo</a>
+ <a class="cta" id="bookBtn" style="display:none" href="https://bookme.name/morgandeancloud29/discovery-call" target="_blank" rel="noopener">Book a demo</a>
   </div>
 
   <script>
@@ -130,6 +130,11 @@
                 placeholder.content += json.delta;
                 b.textContent = placeholder.content;
                 body.scrollTop = body.scrollHeight;
+
+                // if final booking message appears, unhide the demo button
+if (placeholder.content.includes("Please click the button below to book your demo call")) {
+  document.getElementById('bookBtn').style.display = 'block';
+}
               }
             }catch{}
           });
