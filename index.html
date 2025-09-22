@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Cloud29 Discovery Chat</title>
+  <style>
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Helvetica,Arial,sans-serif;margin:0}
+    .wrap{max-width:900px;margin:0 auto;padding:32px}
+    .hero{padding:24px 0}
+    .cta{display:inline-block;margin-top:12px;padding:10px 14px;border-radius:10px;border:1px solid #ccc;text-decoration:none}
+    /* Chat widget */
+    .chat-fab{position:fixed;right:16px;bottom:16px;border:none;padding:14px 16px;border-radius:999px;box-shadow:0 10px 25px rgba(0,0,0,.15);cursor:pointer;font-weight:600;background:#000;color:#fff}
+    .chat-panel{position:fixed;right:16px;bottom:80px;width:360px;max-width:92vw;height:560px;background:#fff;border-radius:16px;box-shadow:0 20px 40px rgba(0,0,0,.2);display:none;flex-direction:column;overflow:hidden;border:1px solid #e8e8e8}
+    .chat-header{padding:12px 14px;font-weight:700;border-bottom:1px solid #eee}
+    .chat-body{flex:1;padding:12px;overflow:auto;font-size:14px;line-height:1.5;background:#fafafa}
+    .chat-msg{margin:8px 0;padding:10px 12px;border-radius:12px;max-width:85%;white-space:pre-wrap}
+    .chat-user{background:#dff1ff;margin-left:auto}
+    .chat-bot{background:#fff;margin-right:auto;border:1px solid #eee}
+    .chat-input{display:flex;border-top:1px solid #eee;background:#fff}
+    .chat-input input{flex:1;border:none;padding:12px;font-size:14px;outline:none}
+    .chat-input button{border:none;padding:0 14px;font-weight:600;cursor:pointer;background:#000;color:#fff}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="hero">
+      <h1>Cloud29 Discovery Chat (Preview)</h1>
+      <p>Click the chat button in the bottom-right to start the 2-minute discovery.</p>
+      <!-- Your real booking link will live on your landing page -->
+      <a class="cta" id="bookBtn" href="#" target="_blank" rel="noopener">Book a demo</a>
+    </div>
+  </div>
+
+  <!-- Chat widget -->
+  <button class="chat-fab" id="chatFab">Chat</button>
+  <div class="chat-panel" id="chatPanel" aria-live="polite">
+    <div class="chat-header">Cloud29 AI Assistant</div>
+    <div class="chat-body" id="chatBody"></div>
+    <div class="chat-input">
+      <input id="chatInput" placeholder="Type your message..." />
+      <button id="chatSend">Send</button>
+    </div>
+  </div>
+
+  <script>
+    (function(){
+      const fab = document.getElementById('chatFab');
+      const panel = document.getElementById('chatPanel');
+      const body = document.getElementById('chatBody');
+      const input = document.getElementById('chatInput');
+      const send = document.getElementById('chatSend');
+
+      // conversation history (client-side only)
+      let history = [];
+
+      fab.onclick = () => {
+        const shown = panel.style.display === 'flex';
+        panel.style.display = shown ? 'none' : 'flex';
+        if (!shown && history.length === 0) {
+          // kick off greeting per your description
+          pushAssistant('Hi, thanks for speaking to the Cloud29 AI Assistant 👋. This will take about 2 minutes.\nTo begin, please share:\n1) Your first name\n2) Your company name\n3) Your contact email');
+        }
+      };
+
+      send.onclick = submit;
+      input.addEventListener('keydown', (e) => { if (e.key === 'Enter') submit(); });
+
+      function pushUser(text){ history.push({ role:'user', content:text }); render(); }
+      function pushAssistant(text){ history.push({ role:'assistant', content:text }); render(); }
+
+      function render(){
+        body.innerHTML = '';
+        history.forEach(m => {
+          const div = document.createElement('div');
+          div.className = 'chat-msg ' + (m.role === 'user' ? 'chat-user' : 'chat-bot');
+          div.textContent = m.content;
+          body.appendChild(div);
+        });
+        body.scrollTop = body.scrollHeight;
+      }
+
+      async function submit(){
+        const text = input.value.trim();
+        if (!text) return;
+        input.value = '';
+        pushUser(text);
+
+        // create a placeholder assistant message we’ll stream into
+        const placeholder = { role: 'assistant', content: '' };
+        history.push(placeholder); render();
+
+        // IMPORTANT: if your landing page is on a different domain than Vercel,
+        // replace '/api/chat' with the full URL: 'https://<your-vercel-project>.vercel.app/api/chat'
+        const res = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ messages: history.filter(Boolean) })
+        });
+
+        if (!res.ok || !res.body){
+          placeholder.content = 'Sorry—something went wrong.';
+          render();
+          return;
+        }
+
+        const reader = res.body.getReader();
+        const decoder = new TextDecoder();
+
+        while (true) {
+          const { value, done } = await reader.read();
+          if (done) break;
+          const chunk = decoder.decode(value, { stream: true });
+
+          // Expect SSE lines: data: {...} or data: [DONE]
+          chunk.split('\n').forEach(line => {
+            if (!line.startsWith('data:')) return;
+            const data = line.slice(5).trim();
+            if (!data) return;
+            if (data === '[DONE]') return;
+
+            try {
+              const json = JSON.parse(data);
+              // We stream as { delta: "text" }
+              if (typeof json.delta === 'string') {
+                placeholder.content += json.delta;
+                render();
+              }
+            } catch (e) {
+              // ignore non-JSON
+            }
+          });
+        }
+      }
+    })();
+  </script>
+</body>
+</html>
