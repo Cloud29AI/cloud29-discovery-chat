@@ -3,135 +3,140 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Cloud29 Discovery Chat</title>
+  <title>Cloud29 AI System</title>
   <style>
-    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Helvetica,Arial,sans-serif;margin:0}
-    .wrap{max-width:900px;margin:0 auto;padding:32px}
-    .hero{padding:24px 0}
-    .cta{display:inline-block;margin-top:12px;padding:10px 14px;border-radius:10px;border:1px solid #ccc;text-decoration:none}
-    /* Chat widget */
-    .chat-fab{position:fixed;right:16px;bottom:16px;border:none;padding:14px 16px;border-radius:999px;box-shadow:0 10px 25px rgba(0,0,0,.15);cursor:pointer;font-weight:600;background:#000;color:#fff}
-    .chat-panel{position:fixed;right:16px;bottom:80px;width:360px;max-width:92vw;height:560px;background:#fff;border-radius:16px;box-shadow:0 20px 40px rgba(0,0,0,.2);display:none;flex-direction:column;overflow:hidden;border:1px solid #e8e8e8}
-    .chat-header{padding:12px 14px;font-weight:700;border-bottom:1px solid #eee}
-    .chat-body{flex:1;padding:12px;overflow:auto;font-size:14px;line-height:1.5;background:#fafafa}
-    .chat-msg{margin:8px 0;padding:10px 12px;border-radius:12px;max-width:85%;white-space:pre-wrap}
-    .chat-user{background:#dff1ff;margin-left:auto}
-    .chat-bot{background:#fff;margin-right:auto;border:1px solid #eee}
-    .chat-input{display:flex;border-top:1px solid #eee;background:#fff}
-    .chat-input input{flex:1;border:none;padding:12px;font-size:14px;outline:none}
-    .chat-input button{border:none;padding:0 14px;font-weight:600;cursor:pointer;background:#000;color:#fff}
+    :root{
+      --bg:#f6f7fb;
+      --card:#ffffff;
+      --text:#111827;
+      --muted:#6b7280;
+      --border:#e5e7eb;
+      --brand:#0f172a;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
+    .wrap{max-width:980px;margin:0 auto;padding:48px 20px}
+    .title{font-weight:800;font-size:34px;line-height:1.1;text-align:center;margin:0 0 10px}
+    .subtitle{color:var(--muted);text-align:center;margin:0 0 26px}
+    .chat-shell{background:var(--card);border:1px solid var(--border);border-radius:20px;box-shadow:0 15px 40px rgba(0,0,0,.06);height:72vh;max-height:780px;display:flex;flex-direction:column;overflow:hidden}
+    .chat-body{flex:1;overflow:auto;padding:18px 18px 10px;background:#fff}
+    .row{display:flex;gap:10px;margin:10px 0;align-items:flex-start}
+    .avatar{min-width:34px;height:34px;border-radius:999px;background:#eef2ff;color:#111827;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12px;border:1px solid var(--border)}
+    .bubble{background:#f8fafc;border:1px solid var(--border);padding:12px 14px;border-radius:14px 14px 14px 6px;max-width:78%;white-space:pre-wrap}
+    .row.user{justify-content:flex-end}
+    .row.user .bubble{background:#dff1ff;border-color:#cae9ff;border-radius:14px 14px 6px 14px}
+    .input-wrap{border-top:1px solid var(--border);background:#fff;padding:14px}
+    .input{display:flex;gap:10px}
+    .input input{flex:1;border:1px solid var(--border);border-radius:999px;padding:14px 16px;font-size:15px;outline:none}
+    .input button{border:none;border-radius:999px;padding:0 18px;background:var(--brand);color:#fff;font-weight:700;cursor:pointer}
+    .cta{display:block;width:max-content;margin:18px auto 0;padding:10px 14px;border-radius:10px;border:1px solid var(--border);text-decoration:none;color:var(--text);background:#fff}
   </style>
 </head>
 <body>
   <div class="wrap">
-    <div class="hero">
-      <h1>Cloud29 Discovery Chat (Preview)</h1>
-      <p>Click the chat button in the bottom-right to start the 2-minute discovery.</p>
-      <!-- Your real booking link will live on your landing page -->
-      <a class="cta" id="bookBtn" href="#" target="_blank" rel="noopener">Book a demo</a>
-    </div>
-  </div>
+    <h1 class="title">Cloud29 AI System</h1>
+    <p class="subtitle">This takes around 2 minutes. Start by sharing your company name and a contact email.</p>
 
-  <!-- Chat widget -->
-  <button class="chat-fab" id="chatFab">Chat</button>
-  <div class="chat-panel" id="chatPanel" aria-live="polite">
-    <div class="chat-header">Cloud29 AI Assistant</div>
-    <div class="chat-body" id="chatBody"></div>
-    <div class="chat-input">
-      <input id="chatInput" placeholder="Type your message..." />
-      <button id="chatSend">Send</button>
+    <div class="chat-shell" id="chatShell" aria-live="polite">
+      <div class="chat-body" id="chatBody"></div>
+      <div class="input-wrap">
+        <div class="input">
+          <input id="chatInput" placeholder="Please type here..." />
+          <button id="chatSend" aria-label="Send">➜</button>
+        </div>
+      </div>
     </div>
+
+    <!-- Your booking button (uses your real link) -->
+    <a class="cta" id="bookBtn" href="https://bookme.name/morgandeancloud29/discovery-call" target="_blank" rel="noopener">Book a demo</a>
   </div>
 
   <script>
     (function(){
-      const fab = document.getElementById('chatFab');
-      const panel = document.getElementById('chatPanel');
       const body = document.getElementById('chatBody');
       const input = document.getElementById('chatInput');
-      const send = document.getElementById('chatSend');
+      const send  = document.getElementById('chatSend');
 
-      // conversation history (client-side only)
+      // conversation history (what we send to /api/chat)
       let history = [];
 
-      fab.onclick = () => {
-        const shown = panel.style.display === 'flex';
-        panel.style.display = shown ? 'none' : 'flex';
-        if (!shown && history.length === 0) {
-          // kick off greeting per your description
-          pushAssistant('Hi, thanks for speaking to the Cloud29 AI Assistant 👋. This will take about 2 minutes.\nTo begin, please share:\n1) Your first name\n2) Your company name\n3) Your contact email');
-        }
-      };
+      // Initial assistant message (purely visual; conversation starts when user replies)
+      pushAssistant(`Hi, thanks for speaking to the Cloud29 AI Assistant 👋. To begin, please share:
+1) Your first name
+2) Your company name
+3) Your contact email (e.g., team@acme.com)`);
 
       send.onclick = submit;
-      input.addEventListener('keydown', (e) => { if (e.key === 'Enter') submit(); });
+      input.addEventListener('keydown', (e)=>{ if(e.key === 'Enter') submit(); });
 
-      function pushUser(text){ history.push({ role:'user', content:text }); render(); }
-      function pushAssistant(text){ history.push({ role:'assistant', content:text }); render(); }
+      function row(el){ body.appendChild(el); body.scrollTop = body.scrollHeight; }
+      function mk(tag, cls, txt){ const el=document.createElement(tag); if(cls) el.className=cls; if(txt!==undefined) el.textContent=txt; return el; }
 
-      function render(){
-        body.innerHTML = '';
-        history.forEach(m => {
-          const div = document.createElement('div');
-          div.className = 'chat-msg ' + (m.role === 'user' ? 'chat-user' : 'chat-bot');
-          div.textContent = m.content;
-          body.appendChild(div);
-        });
-        body.scrollTop = body.scrollHeight;
+      function pushAssistant(text){
+        const r = mk('div','row');
+        const a = mk('div','avatar','C29'); r.appendChild(a);
+        const b = mk('div','bubble',text); r.appendChild(b);
+        row(r);
+        history.push({ role:'assistant', content:text });
+      }
+
+      function pushUser(text){
+        const r = mk('div','row user');
+        const b = mk('div','bubble',text); r.appendChild(b);
+        row(r);
+        history.push({ role:'user', content:text });
       }
 
       async function submit(){
         const text = input.value.trim();
-        if (!text) return;
+        if(!text) return;
         input.value = '';
         pushUser(text);
 
-        // create a placeholder assistant message we’ll stream into
-        const placeholder = { role: 'assistant', content: '' };
-        history.push(placeholder); render();
+        // placeholder assistant message to stream into
+        const placeholder = { role:'assistant', content:'' };
+        history.push(placeholder);
 
-        // IMPORTANT: if your landing page is on a different domain than Vercel,
-        // replace '/api/chat' with the full URL: 'https://<your-vercel-project>.vercel.app/api/chat'
         const res = await fetch('/api/chat', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          method:'POST',
+          headers:{ 'Content-Type':'application/json' },
           body: JSON.stringify({ messages: history.filter(Boolean) })
         });
 
-        if (!res.ok || !res.body){
+        if(!res.ok || !res.body){
           placeholder.content = 'Sorry—something went wrong.';
-          render();
+          renderTail();
           return;
         }
 
         const reader = res.body.getReader();
         const decoder = new TextDecoder();
 
-        while (true) {
-          const { value, done } = await reader.read();
-          if (done) break;
-          const chunk = decoder.decode(value, { stream: true });
+        // render the placeholder row
+        const r = mk('div','row'); const a = mk('div','avatar','C29'); r.appendChild(a);
+        const b = mk('div','bubble',''); r.appendChild(b); row(r);
 
-          // Expect SSE lines: data: {...} or data: [DONE]
-          chunk.split('\n').forEach(line => {
-            if (!line.startsWith('data:')) return;
+        while(true){
+          const {value, done} = await reader.read();
+          if(done) break;
+          const chunk = decoder.decode(value, {stream:true});
+          chunk.split('\n').forEach(line=>{
+            if(!line.startsWith('data:')) return;
             const data = line.slice(5).trim();
-            if (!data) return;
-            if (data === '[DONE]') return;
-
-            try {
+            if(!data || data === '[DONE]') return;
+            try{
               const json = JSON.parse(data);
-              // We stream as { delta: "text" }
-              if (typeof json.delta === 'string') {
+              if(typeof json.delta === 'string'){
                 placeholder.content += json.delta;
-                render();
+                b.textContent = placeholder.content;
+                body.scrollTop = body.scrollHeight;
               }
-            } catch (e) {
-              // ignore non-JSON
-            }
+            }catch{}
           });
         }
       }
+
+      function renderTail(){ /* no-op, bubbles already in DOM */ }
     })();
   </script>
 </body>
